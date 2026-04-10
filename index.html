@@ -568,39 +568,46 @@
         
         @media (max-width: 600px) {
             .upload-strip {
-                padding: 6px 12px;
-                gap: 8px;
+                flex-direction: column;
+                padding: 12px 16px;
+                gap: 10px;
                 margin: 16px 10px 12px 10px;
+                text-align: center;
+            }
+            
+            .upload-strip-text {
+                font-size: 14px;
+                order: 1;
+            }
+            
+            .upload-buttons {
+                gap: 8px;
+                order: 2;
+                justify-content: center;
+            }
+            
+            .upload-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+                min-width: 100px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .upload-strip {
+                padding: 10px 12px;
+                gap: 8px;
+                min-width: 280px;
             }
             
             .upload-strip-text {
                 font-size: 13px;
             }
             
-            .upload-buttons {
-                gap: 4px;
-            }
-            
             .upload-btn {
-                padding: 3px 6px;
-                font-size: 10px;
-            }
-        }
-        
-        @media (max-width: 400px) {
-            .upload-strip {
                 padding: 6px 10px;
-                gap: 6px;
-                min-width: 280px;
-            }
-            
-            .upload-strip-text {
-                font-size: 12px;
-            }
-            
-            .upload-btn {
-                padding: 3px 5px;
-                font-size: 9px;
+                font-size: 11px;
+                min-width: 90px;
             }
         }
         
@@ -612,17 +619,113 @@
         .hidden-file-input {
             display: none;
         }
+        
+        .help-button {
+            position: fixed;
+            top: 10px;
+            right: 80px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #444;
+            border: 1px solid #666;
+            color: #aaa;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 1001;
+        }
+        
+        .help-button:hover {
+            background: #555;
+            color: #ff9d00;
+            border-color: #ff9d00;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        
+        .modal {
+            background: #2a2a2a;
+            border: 1px solid #666;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            position: relative;
+            color: white;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 20px;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            color: #ff9d00;
+        }
+        
+        .modal h3 {
+            margin: 0 0 15px 0;
+            color: #ff9d00;
+            font-size: 18px;
+        }
+        
+        .modal p {
+            margin: 0 0 12px 0;
+            line-height: 1.5;
+            color: #ddd;
+        }
+        
+        .modal p:last-child {
+            margin-bottom: 0;
+        }
     </style>
 </head>
 <body>
     <div id="dataStatus" style="position: fixed; top: 10px; right: 15px; font-size: 12px; color: #666; z-index: 1000;"></div>
+    <button class="help-button" onclick="openHelpModal()">?</button>
+    
+    <div class="modal-overlay" id="helpModal" onclick="closeHelpModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeHelpModal()">&times;</button>
+            <h3>About Dispatch</h3>
+            <p>Dispatch is a SnowRunner vehicle reference tool.</p>
+            <p>Default vehicle data is based on community-provided CSV data created and maintained by [SOURCE NAME].</p>
+            <p>Dispatch is designed to make that data easier to browse, search, and explore in a cleaner interface.</p>
+            <p>You can also upload your own updated CSV files at any time to override the default data stored in the app.</p>
+        </div>
+    </div>
+    
     <div class="app-header">
         <h1 class="app-title">DISPATCH</h1>
         <p class="app-subtitle">SnowRunner Vehicle Reference</p>
     </div>
     
     <div class="upload-strip">
-        <div class="upload-strip-text">Upload SnowRunner CSVs to use Dispatch</div>
+        <div class="upload-strip-text">Upload your own CSV files to override defaults</div>
         <div class="upload-buttons">
             <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Vehicle CSV</button>
             <button class="upload-btn" onclick="document.getElementById('upgradesFileInput').click()">Upgrades CSV</button>
@@ -670,6 +773,22 @@
         if (DEBUG_MODE) {
             document.body.classList.add('debug-visible');
         }
+
+        // Help modal functions
+        function openHelpModal() {
+            document.getElementById('helpModal').style.display = 'flex';
+        }
+
+        function closeHelpModal() {
+            document.getElementById('helpModal').style.display = 'none';
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeHelpModal();
+            }
+        });
 
         // LOCALSTORAGE PERSISTENCE LAYER
         const STORAGE_KEYS = {
@@ -808,22 +927,70 @@
             }
         }
 
+        function loadDefaultData() {
+            // Try to load bundled default vehicle CSV
+            fetch('vehicles.csv')
+                .then(response => response.ok ? response.text() : Promise.reject('No default vehicles.csv'))
+                .then(csvText => {
+                    console.log('🔄 Loading default vehicle CSV');
+                    processVehicleCSVText(csvText, 'vehicles.csv (default)');
+                })
+                .catch(error => {
+                    console.log('ℹ️ No default vehicle CSV found, manual upload required');
+                    updateDataStatus();
+                });
+            
+            // Try to load bundled default upgrades CSV
+            fetch('upgrades.csv')
+                .then(response => response.ok ? response.text() : Promise.reject('No default upgrades.csv'))
+                .then(csvText => {
+                    console.log('🔄 Loading default upgrades CSV');
+                    processUpgradesCSVText(csvText, 'upgrades.csv (default)');
+                })
+                .catch(error => {
+                    console.log('ℹ️ No default upgrades CSV found, manual upload optional');
+                    updateDataStatus();
+                });
+        }
+
         function autoLoadSavedData() {
-            // Try to load saved vehicle CSV
+            // Try to load saved vehicle CSV first (localStorage priority)
             const savedVehicleData = loadSavedVehicleCSV();
             if (savedVehicleData) {
                 console.log('🔄 Auto-loading saved vehicle CSV:', savedVehicleData.filename);
                 processVehicleCSVText(savedVehicleData.csvText, savedVehicleData.filename);
+            } else {
+                // Fall back to default vehicle CSV
+                fetch('vehicles.csv')
+                    .then(response => response.ok ? response.text() : Promise.reject('No default vehicles.csv'))
+                    .then(csvText => {
+                        console.log('🔄 Loading default vehicle CSV');
+                        processVehicleCSVText(csvText, 'vehicles.csv (default)');
+                    })
+                    .catch(error => {
+                        console.log('ℹ️ No default vehicle CSV found, manual upload required');
+                        updateDataStatus();
+                    });
             }
             
-            // Try to load saved upgrades CSV
+            // Try to load saved upgrades CSV first (localStorage priority)
             const savedUpgradesData = loadSavedUpgradesCSV();
             if (savedUpgradesData) {
                 console.log('🔄 Auto-loading saved upgrades CSV:', savedUpgradesData.filename);
                 processUpgradesCSVText(savedUpgradesData.csvText, savedUpgradesData.filename);
+            } else {
+                // Fall back to default upgrades CSV
+                fetch('upgrades.csv')
+                    .then(response => response.ok ? response.text() : Promise.reject('No default upgrades.csv'))
+                    .then(csvText => {
+                        console.log('🔄 Loading default upgrades CSV');
+                        processUpgradesCSVText(csvText, 'upgrades.csv (default)');
+                    })
+                    .catch(error => {
+                        console.log('ℹ️ No default upgrades CSV found, manual upload optional');
+                        updateDataStatus();
+                    });
             }
-            
-            updateDataStatus();
         }
 
         // STEP 2: Normalization Layer Implementation
