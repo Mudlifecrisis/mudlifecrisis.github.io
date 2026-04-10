@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dispatch</title>
+    <style>
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background: #1a1a1a;
+            color: #ffffff;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        
+        .debug-section {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .debug-title {
+            color: #ff9d00;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+        
+        pre {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        
+        .error {
+            color: #ff4444;
+            font-weight: bold;
+        }
+        
+        .success {
+            color: #44ff44;
+            font-weight: bold;
+        }
+        
+        .warning {
+            color: #ffaa00;
+            font-weight: bold;
+        }
+        
+        .step-info {
+            background: #2a3a2a;
+            border-left: 4px solid #44ff44;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        /* STEP 3 UI Styles */
+        .vehicle-search-section {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 600px;
+            min-width: 300px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 600px) {
+            .vehicle-search-section {
+                padding: 16px;
+                margin: 20px 10px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .vehicle-search-section {
+                padding: 12px;
+                min-width: 280px;
+            }
+        }
+        
+        .vehicle-search-section label {
+            display: block;
+            margin-bottom: 10px;
+            color: #ff9d00;
+            font-weight: bold;
+        }
+        
+        #vehicleSearch {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            background: #1a1a1a;
+            border: 1px solid #666;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: text;
+            box-sizing: border-box;
+        }
+        
+        .vehicle-search-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 500px) {
+            #vehicleSearch {
+                max-width: 350px;
+                padding: 8px;
+                font-size: 15px;
+            }
+            
+            .vehicle-search-container {
+                max-width: 350px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            #vehicleSearch {
+                max-width: 280px;
+                padding: 8px;
+                font-size: 14px;
+            }
+            
+            .vehicle-search-container {
+                max-width: 280px;
+            }
+        }
+        
+        .dropdown-arrow {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+            pointer-events: none;
+            font-size: 12px;
+        }
+        
+        .search-results {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #444;
+            border-radius: 5px;
+            margin-top: 10px;
+            background: #1a1a1a;
+            display: none;
+        }
+        
+        .search-result-item {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #333;
+        }
+        
+        .search-result-item:hover {
+            background: #333;
+        }
+        
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .vehicle-display {
+            margin: 20px 0;
+        }
+        
+        .vehicle-placeholder {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+        }
+        
+        .vehicle-card {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px 0;
+        }
+        
+        .vehicle-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff9d00;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+        }
+        
+        .vehicle-section {
+            margin: 20px 0;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        
+        .vehicle-section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #44ff44;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 8px;
+        }
+        
+        .vehicle-field {
+            margin: 8px 0;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .vehicle-field-label {
+            color: #aaa;
+            min-width: 150px;
+            margin-right: 10px;
+        }
+        
+        .vehicle-field-value {
+            color: white;
+            flex: 1;
+        }
+        
+        .equipment-list {
+            margin: 10px 0;
+        }
+        
+        .equipment-item {
+            background: #333;
+            border: 1px solid #555;
+            border-radius: 3px;
+            padding: 8px;
+            margin: 5px 0;
+        }
+        
+        .equipment-type {
+            color: #ff9d00;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .equipment-values {
+            color: white;
+        }
+        
+        @media (max-width: 600px) {
+            .vehicle-field {
+                flex-direction: column;
+            }
+            
+            .vehicle-field-label {
+                min-width: auto;
+                margin-right: 0;
+                margin-bottom: 5px;
+                font-weight: bold;
+            }
+        }
+
+        /* Compact vehicle summary card styles */
+        .vehicle-summary-card {
+            padding: 12px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+        }
+
+        .vehicle-header h2 {
+            margin: 0 0 6px 0;
+            font-size: 1.2rem;
+            line-height: 1.2;
+            color: #ff9d00;
+        }
+
+        .vehicle-subheader {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 14px;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+            color: #aaa;
+        }
+
+        .vehicle-price {
+            color: #44ff44;
+            font-weight: 700;
+        }
+
+        .main-stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 12px;
+            margin-bottom: 12px;
+        }
+
+        .stat-row {
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.04);
+        }
+
+        .stat-label {
+            font-size: 0.78rem;
+            opacity: 0.8;
+            margin-bottom: 2px;
+            color: #aaa;
+        }
+
+        .stat-value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            line-height: 1.2;
+            color: #fff;
+        }
+
+        .compact-block {
+            margin-bottom: 12px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.04);
+        }
+
+        .block-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #44ff44;
+        }
+
+        .block-value,
+        .detail-text {
+            font-size: 0.92rem;
+            line-height: 1.35;
+            color: #fff;
+        }
+
+        .more-details summary {
+            cursor: pointer;
+            font-weight: 700;
+            padding: 10px 0;
+            color: #ff9d00;
+        }
+
+        .detail-section {
+            padding: 8px 0 12px 0;
+        }
+
+        .detail-section h3 {
+            margin: 0 0 8px 0;
+            font-size: 0.95rem;
+            color: #44ff44;
+        }
+
+        .two-column-bullet-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 4px 16px;
+            font-size: 0.92rem;
+            line-height: 1.35;
+            color: #fff;
+        }
+
+        @media (min-width: 600px) {
+            .two-column-bullet-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .bullet-item {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .bullet-item::before {
+            content: '•';
+            margin-right: 8px;
+            flex-shrink: 0;
+            color: #44ff44;
+        }
+
+        .class-filter-pills {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 6px;
+            margin: 10px auto 20px auto;
+            justify-content: center;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .filter-pill {
+            padding: 5px 10px;
+            border: 1px solid #666;
+            border-radius: 16px;
+            background: #2a2a2a;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+            user-select: none;
+            white-space: nowrap;
+            flex-shrink: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+        }
+        
+        @media (max-width: 600px) {
+            .class-filter-pills {
+                gap: 4px;
+            }
+            
+            .filter-pill {
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+        }
+        
+        @media (max-width: 500px) {
+            .class-filter-pills {
+                gap: 3px;
+            }
+            
+            .filter-pill {
+                padding: 3px 6px;
+                font-size: 10px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .filter-pill {
+                padding: 3px 5px;
+                font-size: 9px;
+            }
+        }
+
+        .filter-pill:hover {
+            border-color: #ff9d00;
+            color: #ff9d00;
+        }
+
+        .filter-pill.active {
+            background: #ff9d00;
+            border-color: #ff9d00;
+            color: #000;
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            .main-stat-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .stat-label {
+                font-size: 0.74rem;
+            }
+
+            .stat-value {
+                font-size: 0.9rem;
+            }
+
+            .vehicle-summary-card {
+                padding: 10px;
+            }
+
+            .class-filter-pills {
+                gap: 4px;
+            }
+
+            .filter-pill {
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+        }
+        
+        .app-header {
+            text-align: center;
+            margin: 20px 0 30px 0;
+        }
+        
+        .app-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ff9d00;
+            letter-spacing: 2px;
+            margin: 0;
+        }
+        
+        .app-subtitle {
+            font-size: 16px;
+            color: #777;
+            margin: 5px 0 0 0;
+            font-weight: normal;
+        }
+        
+        #debugOutput {
+            display: none;
+        }
+        
+        .debug-visible #debugOutput {
+            display: block;
+        }
+        
+        .upload-strip {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 8px 16px;
+            margin: 16px auto 12px auto;
+            max-width: 600px;
+            min-width: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            box-sizing: border-box;
+        }
+        
+        .upload-strip-text {
+            color: #aaa;
+            font-size: 14px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .upload-buttons {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 1;
+            min-width: 0;
+        }
+        
+        .upload-btn {
+            padding: 4px 8px;
+            background: #333;
+            border: 1px solid #666;
+            border-radius: 4px;
+            color: white;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        @media (max-width: 600px) {
+            .upload-strip {
+                padding: 6px 12px;
+                gap: 8px;
+                margin: 16px 10px 12px 10px;
+            }
+            
+            .upload-strip-text {
+                font-size: 13px;
+            }
+            
+            .upload-buttons {
+                gap: 4px;
+            }
+            
+            .upload-btn {
+                padding: 3px 6px;
+                font-size: 10px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .upload-strip {
+                padding: 6px 10px;
+                gap: 6px;
+                min-width: 280px;
+            }
+            
+            .upload-strip-text {
+                font-size: 12px;
+            }
+            
+            .upload-btn {
+                padding: 3px 5px;
+                font-size: 9px;
+            }
+        }
+        
+        .upload-btn:hover {
+            background: #444;
+            border-color: #ff9d00;
+        }
+        
+        .hidden-file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="dataStatus" style="position: fixed; top: 10px; right: 15px; font-size: 12px; color: #666; z-index: 1000;"></div>
+    <div class="app-header">
+        <h1 class="app-title">DISPATCH</h1>
+        <p class="app-subtitle">SnowRunner Vehicle Reference</p>
+    </div>
+    
+    <div class="upload-strip">
+        <div class="upload-strip-text">Upload SnowRunner CSVs to use Dispatch</div>
+        <div class="upload-buttons">
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">Vehicle CSV</button>
+            <button class="upload-btn" onclick="document.getElementById('upgradesFileInput').click()">Upgrades CSV</button>
+        </div>
+    </div>
+    
+    <input type="file" id="fileInput" accept=".csv" class="hidden-file-input" />
+    <input type="file" id="upgradesFileInput" accept=".csv" class="hidden-file-input" />
+    
+    <div id="debugOutput"></div>
+    
+    <!-- STEP 3 UI Section -->
+    <div id="step3UI" style="display: none;">
+        <h2 style="text-align: center; color: #44ff44; margin: 20px 0 0 0; font-size: 20px;">🔍 Vehicle Reference</h2>
+        <div class="vehicle-search-section">
+            <label>Filter by class:</label>
+            <div class="class-filter-pills">
+                <span class="filter-pill" data-class="Scout">Scout</span>
+                <span class="filter-pill" data-class="Highway">Highway</span>
+                <span class="filter-pill" data-class="Heavy Duty">Heavy Duty</span>
+                <span class="filter-pill" data-class="Offroad">Offroad</span>
+                <span class="filter-pill" data-class="Heavy">Heavy</span>
+            </div>
+            <label for="vehicleSearch">Search for a vehicle:</label>
+            <div class="vehicle-search-container">
+                <input type="text" id="vehicleSearch" placeholder="Click to browse or type to search..." />
+                <div class="dropdown-arrow">▼</div>
+                <div id="searchResults" class="search-results"></div>
+            </div>
+        </div>
+        
+        <div id="vehicleDisplay" class="vehicle-display">
+            <div class="vehicle-placeholder">Select a vehicle to view its details</div>
+        </div>
+    </div>
+    
+    <!-- Papa Parse CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <script>
+        // DEBUG MODE - set to true to show debug output
+        const DEBUG_MODE = false;
+
+        // Apply debug visibility
+        if (DEBUG_MODE) {
+            document.body.classList.add('debug-visible');
+        }
+
+        // LOCALSTORAGE PERSISTENCE LAYER
+        const STORAGE_KEYS = {
+            VEHICLE_CSV: 'snowrunner_vehicle_csv',
+            VEHICLE_FILENAME: 'snowrunner_vehicle_filename', 
+            VEHICLE_TIMESTAMP: 'snowrunner_vehicle_timestamp',
+            UPGRADES_CSV: 'snowrunner_upgrades_csv',
+            UPGRADES_FILENAME: 'snowrunner_upgrades_filename',
+            UPGRADES_TIMESTAMP: 'snowrunner_upgrades_timestamp'
+        };
+
+        function saveVehicleCSV(csvText, filename) {
+            try {
+                localStorage.setItem(STORAGE_KEYS.VEHICLE_CSV, csvText);
+                localStorage.setItem(STORAGE_KEYS.VEHICLE_FILENAME, filename);
+                localStorage.setItem(STORAGE_KEYS.VEHICLE_TIMESTAMP, new Date().toISOString());
+                console.log('✅ Vehicle CSV saved to localStorage');
+            } catch (error) {
+                console.warn('Failed to save vehicle CSV to localStorage:', error);
+            }
+        }
+
+        function saveUpgradesCSV(csvText, filename) {
+            try {
+                localStorage.setItem(STORAGE_KEYS.UPGRADES_CSV, csvText);
+                localStorage.setItem(STORAGE_KEYS.UPGRADES_FILENAME, filename);
+                localStorage.setItem(STORAGE_KEYS.UPGRADES_TIMESTAMP, new Date().toISOString());
+                console.log('✅ Upgrades CSV saved to localStorage');
+            } catch (error) {
+                console.warn('Failed to save upgrades CSV to localStorage:', error);
+            }
+        }
+
+        function loadSavedVehicleCSV() {
+            const csvText = localStorage.getItem(STORAGE_KEYS.VEHICLE_CSV);
+            const filename = localStorage.getItem(STORAGE_KEYS.VEHICLE_FILENAME);
+            const timestamp = localStorage.getItem(STORAGE_KEYS.VEHICLE_TIMESTAMP);
+            
+            if (csvText && filename) {
+                return { csvText, filename, timestamp };
+            }
+            return null;
+        }
+
+        function loadSavedUpgradesCSV() {
+            const csvText = localStorage.getItem(STORAGE_KEYS.UPGRADES_CSV);
+            const filename = localStorage.getItem(STORAGE_KEYS.UPGRADES_FILENAME);
+            const timestamp = localStorage.getItem(STORAGE_KEYS.UPGRADES_TIMESTAMP);
+            
+            if (csvText && filename) {
+                return { csvText, filename, timestamp };
+            }
+            return null;
+        }
+
+        function processVehicleCSVText(csvText, filename) {
+            debugOutput.innerHTML = '<div class="debug-section"><div class="debug-title">🔄 Processing Vehicle CSV...</div></div>';
+            
+            // Save to localStorage BEFORE parsing
+            saveVehicleCSV(csvText, filename);
+            
+            Papa.parse(csvText, {
+                header: false,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    buildNormalizationLayer(results.data, filename);
+                },
+                error: function(error) {
+                    showError('Papa Parse Error: ' + error.message);
+                }
+            });
+        }
+
+        function processUpgradesCSVText(csvText, filename) {
+            console.log('Processing upgrades CSV:', filename);
+            
+            // Save to localStorage BEFORE parsing
+            saveUpgradesCSV(csvText, filename);
+            
+            Papa.parse(csvText, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    try {
+                        // Convert CSV rows to vehicle-keyed format
+                        const upgradesData = {};
+                        
+                        results.data.forEach(row => {
+                            const vehicle = (row.vehicle || '').trim();
+                            const upgrade = (row.upgrade || '').trim();
+                            const location = (row.location || '').trim();
+                            const notes = (row.notes || '').trim();
+                            
+                            if (vehicle && upgrade) {
+                                if (!upgradesData[vehicle]) {
+                                    upgradesData[vehicle] = [];
+                                }
+                                
+                                upgradesData[vehicle].push({
+                                    upgrade: upgrade,
+                                    location: location,
+                                    notes: notes
+                                });
+                            }
+                        });
+                        
+                        window.upgradesData = upgradesData;
+                        console.log('✅ Upgrades CSV data loaded:', Object.keys(upgradesData).length, 'vehicles');
+                        
+                        updateDataStatus();
+                        
+                        // Update any currently displayed vehicle to show upgrades
+                        if (currentSelectedVehicle && typeof currentSelectedVehicle === 'object') {
+                            displayVehicle(currentSelectedVehicle);
+                        }
+                    } catch (error) {
+                        console.error('Error processing upgrades CSV:', error);
+                    }
+                },
+                error: function(error) {
+                    console.error('Error parsing upgrades CSV:', error);
+                }
+            });
+        }
+
+        function updateDataStatus() {
+            const vehicleLoaded = !!window.step2Data?.normalizedVehicles?.length;
+            const upgradesLoaded = !!window.upgradesData && Object.keys(window.upgradesData).length > 0;
+            
+            const vehicleStatus = vehicleLoaded ? 'V ✓' : 'V ✕';
+            const upgradesStatus = upgradesLoaded ? 'U ✓' : 'U ✕';
+            
+            const statusElement = document.getElementById('dataStatus');
+            if (statusElement) {
+                statusElement.textContent = `${vehicleStatus} · ${upgradesStatus}`;
+            }
+        }
+
+        function autoLoadSavedData() {
+            // Try to load saved vehicle CSV
+            const savedVehicleData = loadSavedVehicleCSV();
+            if (savedVehicleData) {
+                console.log('🔄 Auto-loading saved vehicle CSV:', savedVehicleData.filename);
+                processVehicleCSVText(savedVehicleData.csvText, savedVehicleData.filename);
+            }
+            
+            // Try to load saved upgrades CSV
+            const savedUpgradesData = loadSavedUpgradesCSV();
+            if (savedUpgradesData) {
+                console.log('🔄 Auto-loading saved upgrades CSV:', savedUpgradesData.filename);
+                processUpgradesCSVText(savedUpgradesData.csvText, savedUpgradesData.filename);
+            }
+            
+            updateDataStatus();
+        }
+
+        // STEP 2: Normalization Layer Implementation
+        
+        const fileInput = document.getElementById('fileInput');
+        const debugOutput = document.getElementById('debugOutput');
+        
+        // TEXT CLEANUP / DISPLAY REPLACEMENT SYSTEM
+        const TEXT_REPLACEMENTS = {
+            'SaddleLow': 'Saddle Low',
+            'SaddleHigh': 'Saddle High', 
+            'SeismicVibrator': 'Seismic Vibrator',
+            'LogCarrierFront': 'Log Carrier Front',
+            'High Low Logging Trailer': 'H/L logging trailer',
+            'LogCrane + LowSaddle Combo': 'LogCrane + LowSaddle Combo',
+            'Crane + Saddle combo': 'Crane + Saddle Combo',
+            'Multi-purpose Cargo Module (Repairs - Wheels - Fuel)': 'Multi-purpose Cargo Module',
+            'Van Body Addon (Repairs - Wheels)': 'Van Body Addon',
+            'Frame Maintenance Addon (Repairs - Wheels - Fuel)': 'Frame Maintenance Addon',
+            'Roof Rack with supplies (Repairs -Wheels - Fuel)': 'Roof Rack with Supplies',
+            'Maximum Supplies (Repairs -Wheels - Fuel)': 'Maximum Supplies',
+            'Metal Detector+ anything combo': 'Metal Detector+ Combo'
+        };
+        
+        // APPROVED FIELD SCHEMA - Source of Truth
+        const APPROVED_FIELDS = {
+            // Identity / Unlock
+            identity: [
+                'Make and Model',
+                'DLC Required', 
+                'Needs to be unlocked',
+                'Unlocked by',
+                'Rank requirement',
+                'Found in region',
+                'Found on map',
+                'Contract or task name for unlock',
+                'Vehicle Class',
+                'Truck Store Price'
+            ],
+            
+            // Core Specs
+            specs: [
+                'Drivetrain',
+                'All-wheel drive',
+                'Differential locking',
+                'Tire Diameter Stock (in)',
+                'Tire Diameter Max (in)',
+                'Fuel Capacity (L)',
+                'Top Engine Torque',
+                'Total Mass with wheels',
+                'Torque to Mass Ratio',
+                'Gearboxes',
+                'Winches',
+                'Raised Suspension',
+                'Custom Suspension',
+                'Crawler Suspension',
+                'Active Suspension'
+            ],
+            
+            // Tire Section (Grouped)
+            tires: [
+                'Mass per tire',
+                'Flotation tires',
+                'Recommended by VladVulcan'
+            ],
+            
+            // Trailer / Saddle
+            trailers: [
+                'Truck Trailer',
+                'Scout Trailer', 
+                'Farming Trailer',
+                'Saddle Low',
+                'Saddle Low Tankers',
+                'Saddle High',
+                'Saddle High Tanker'
+            ],
+            
+            // Crane / Cargo / Logging
+            cargoLogging: [
+                'Loading Crane',
+                'Big Crane',
+                'Superheavy Crane',
+                'Log Crane',
+                '1-slot Bed',
+                '2-slot Bed',
+                '3-slot Bed',
+                '4-slot Bed',
+                'Crane + Saddle combo',
+                'Short Log Addon',
+                'Medium Log Addon',
+                'Log Carrier Front (Long logs)',
+                'LogCrane + LowSaddle Combo',
+                'Futom Logging Trailers',
+                'Foldable Logging Semitrailer (Long Logs)'
+            ],
+            
+            // Support / Maintenance
+            support: [
+                'Frame Fuel Tank (L)',
+                'Frame Water Tank (L)',
+                'Van Body Addon (Repairs - Wheels)',
+                'Frame Maintenance Addon (Repairs - Wheels - Fuel)',
+                'Multi-purpose Cargo Module (Repairs - Wheels - Fuel)',
+                'Roof Rack with supplies (Repairs -Wheels - Fuel)',
+                'Maximum Supplies (Repairs -Wheels - Fuel)',
+                'Spare wheel addon (Pcs)'
+            ],
+            
+            // Special Equipment
+            special: [
+                'Seismic Vibrator',
+                'Metal Detector',
+                'Metal Detector+ anything combo',
+                'Towing Platform'
+            ]
+        };
+        
+        // File input handlers
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                processFile(e.target.files[0]);
+            }
+        });
+        
+        // Handle upgrades JSON file upload
+        const upgradesFileInput = document.getElementById('upgradesFileInput');
+        upgradesFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                processUpgradesFile(e.target.files[0]);
+            }
+        });
+        
+        function processUpgradesFile(file) {
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                console.warn('Please select a CSV file for upgrades');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                processUpgradesCSVText(e.target.result, file.name);
+            };
+            reader.readAsText(file);
+        }
+        
+        function processFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                processVehicleCSVText(e.target.result, file.name);
+            };
+            reader.readAsText(file);
+        }
+        
+        function buildNormalizationLayer(csvData, filename) {
+            let debugHTML = '';
+            
+            // Step 1: Find and normalize headers
+            const headerResult = findAndNormalizeHeaders(csvData);
+            
+            if (!headerResult.success) {
+                debugHTML += createDebugSection('❌ HEADER ERROR', `
+                    <div class="error">${headerResult.error}</div>
+                `);
+                debugOutput.innerHTML = debugHTML;
+                return;
+            }
+            
+            debugHTML += createDebugSection('📋 Header Normalization', `
+                <div class="success">✅ Headers found and normalized</div>
+                <div><strong>Header row index:</strong> ${headerResult.headerRowIndex}</div>
+                <div><strong>Total normalized headers:</strong> ${headerResult.normalizedHeaders.length}</div>
+                <div><strong>Normalized header list:</strong></div>
+                <pre>${headerResult.normalizedHeaders.map((h, i) => `[${i}] ${h}`).join('\\n')}</pre>
+            `);
+            
+            // Step 2: Build column mapping
+            const mappingResult = buildColumnMapping(headerResult.normalizedHeaders);
+            debugHTML += createDebugSection('🗺️ Column Mapping', `
+                <div><strong>Successfully mapped fields:</strong> ${Object.keys(mappingResult.mapping).length}</div>
+                <div><strong>Unmapped approved fields:</strong> ${mappingResult.unmapped.length}</div>
+                ${mappingResult.unmapped.length > 0 ? 
+                    `<div class="warning">Missing fields: ${mappingResult.unmapped.join(', ')}</div>` : 
+                    '<div class="success">All approved fields mapped successfully</div>'
+                }
+                <div><strong>Mapping details:</strong></div>
+                <pre>${JSON.stringify(mappingResult.mapping, null, 2)}</pre>
+            `);
+            
+            // Step 3: Process vehicle rows
+            const dataStartIndex = headerResult.headerRowIndex + 1;
+            const vehicleRows = csvData.slice(dataStartIndex);
+            
+            const normalizedVehicles = [];
+            const skippedRows = [];
+            
+            vehicleRows.forEach((row, index) => {
+                const actualRowIndex = dataStartIndex + index;
+                
+                // Skip if Make and Model is blank
+                const makeModelIndex = mappingResult.mapping['Make and Model'];
+                if (!row[makeModelIndex] || row[makeModelIndex].trim() === '') {
+                    skippedRows.push({ index: actualRowIndex, reason: 'Empty Make and Model' });
+                    return;
+                }
+                
+                // Skip obvious header/metadata rows
+                const makeModel = row[makeModelIndex].toLowerCase();
+                if (makeModel.includes('support me') || makeModel.includes('season') || 
+                    makeModel.includes('last updated') || makeModel.includes('english')) {
+                    skippedRows.push({ index: actualRowIndex, reason: 'Metadata row' });
+                    return;
+                }
+                
+                // Normalize this vehicle row
+                const normalizedVehicle = normalizeVehicleRow(row, mappingResult.mapping);
+                if (normalizedVehicle) {
+                    normalizedVehicles.push(normalizedVehicle);
+                }
+            });
+            
+            debugHTML += createDebugSection('🚛 Vehicle Processing', `
+                <div class="success">✅ Vehicle normalization complete</div>
+                <div><strong>Total vehicle rows processed:</strong> ${normalizedVehicles.length}</div>
+                <div><strong>Rows skipped:</strong> ${skippedRows.length}</div>
+                ${skippedRows.length > 0 ? 
+                    `<div><strong>Skip reasons:</strong></div>
+                     <pre>${skippedRows.map(s => `Row ${s.index}: ${s.reason}`).join('\\n')}</pre>` : ''
+                }
+            `);
+            
+            // Step 4: Show first 3 normalized vehicles
+            if (normalizedVehicles.length >= 3) {
+                debugHTML += createDebugSection('🔍 First 3 Normalized Vehicles', `
+                    <pre>${JSON.stringify(normalizedVehicles.slice(0, 3), null, 2)}</pre>
+                `);
+            } else if (normalizedVehicles.length > 0) {
+                debugHTML += createDebugSection('🔍 Normalized Vehicles (Less than 3)', `
+                    <pre>${JSON.stringify(normalizedVehicles, null, 2)}</pre>
+                `);
+            } else {
+                debugHTML += createDebugSection('❌ NO VEHICLES', `
+                    <div class="error">No valid vehicles were normalized. Check CSV structure.</div>
+                `);
+            }
+            
+            debugOutput.innerHTML = debugHTML;
+            
+            // Store for Step 3
+            window.step2Data = {
+                normalizedVehicles: normalizedVehicles,
+                columnMapping: mappingResult.mapping,
+                headerInfo: headerResult
+            };
+            
+            // STEP 3: Show UI after normalization is complete
+            if (normalizedVehicles.length > 0) {
+                initializeStep3UI();
+            }
+            
+            updateDataStatus();
+        }
+        
+        function findAndNormalizeHeaders(csvData) {
+            // Find header row (look for "Make and Model")
+            let headerRowIndex = -1;
+            let rawHeaders = [];
+            
+            for (let i = 0; i < Math.min(10, csvData.length); i++) {
+                const row = csvData[i];
+                if (row.some(cell => cell && cell.toLowerCase().includes('make') && cell.toLowerCase().includes('model'))) {
+                    headerRowIndex = i;
+                    rawHeaders = row;
+                    break;
+                }
+            }
+            
+            if (headerRowIndex === -1) {
+                return {
+                    success: false,
+                    error: 'Could not find header row containing "Make and Model"'
+                };
+            }
+            
+            // Normalize headers more aggressively
+            const normalizedHeaders = rawHeaders.map(header => {
+                if (!header) return '';
+                
+                return header
+                    .trim()                          // Remove whitespace
+                    .replace(/\n/g, ' ')             // Replace actual newlines with spaces
+                    .replace(/\\n/g, ' ')            // Replace literal \n with spaces
+                    .replace(/\s+/g, ' ')            // Collapse repeated spaces
+                    .trim();                         // Final trim
+            });
+            
+            return {
+                success: true,
+                headerRowIndex: headerRowIndex,
+                rawHeaders: rawHeaders,
+                normalizedHeaders: normalizedHeaders
+            };
+        }
+        
+        function buildColumnMapping(normalizedHeaders) {
+            const mapping = {};
+            const unmapped = [];
+            
+            // Get all approved fields in one flat array
+            const allApprovedFields = Object.values(APPROVED_FIELDS).flat();
+            
+            // Normalize approved field names for matching
+            function normalizeForMatching(text) {
+                return text
+                    .trim()
+                    .replace(/\n/g, ' ')
+                    .replace(/\\n/g, ' ')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .toLowerCase();
+            }
+            
+            // Map each approved field to its column index with aggressive matching
+            allApprovedFields.forEach(approvedField => {
+                const normalizedApproved = normalizeForMatching(approvedField);
+                
+                const columnIndex = normalizedHeaders.findIndex(header => 
+                    normalizeForMatching(header) === normalizedApproved
+                );
+                
+                if (columnIndex !== -1) {
+                    mapping[approvedField] = columnIndex;
+                } else {
+                    unmapped.push(approvedField);
+                }
+            });
+            
+            return {
+                mapping: mapping,
+                unmapped: unmapped
+            };
+        }
+        
+        function normalizeVehicleRow(row, columnMapping) {
+            const vehicle = {
+                // Identity
+                identity: {},
+                // Unlock info  
+                unlock: {},
+                // Core specs
+                specs: {},
+                // Tires (grouped)
+                tires: {},
+                // Equipment sections
+                trailers: [],
+                cargoLogging: [],
+                support: [],
+                special: []
+            };
+            
+            // Helper function to check if value should be considered empty
+            function isEmpty(value) {
+                if (!value) return true;
+                const cleanVal = value.toString().trim().toLowerCase();
+                return cleanVal === '' || cleanVal === 'no' || cleanVal === 'false' || cleanVal === 'n/a';
+            }
+            
+            // Helper function to clean cell value (fix line breaks first, then clean)
+            function cleanCellValue(value) {
+                if (!value) return '';
+                
+                // First: Replace internal line breaks with spaces to prevent word splitting
+                let cleaned = value.toString()
+                    .replace(/\n/g, ' ')       // Replace actual newlines
+                    .replace(/\\n/g, ' ')      // Replace literal \n
+                    .replace(/\s+/g, ' ')      // Collapse repeated spaces
+                    .trim();
+                
+                // Then apply text replacements
+                return cleanText(cleaned);
+            }
+            
+            // Process Identity fields - only basic identity, move unlock fields to unlock section
+            const identityFields = ['Make and Model', 'DLC Required', 'Vehicle Class', 'Truck Store Price'];
+            identityFields.forEach(field => {
+                const columnIndex = columnMapping[field];
+                if (columnIndex !== undefined && !isEmpty(row[columnIndex])) {
+                    const value = cleanCellValue(row[columnIndex]);
+                    if (value) {
+                        if (field === 'Make and Model') {
+                            vehicle.identity.name = value;
+                        } else {
+                            const key = fieldToKey(field);
+                            vehicle.identity[key] = value;
+                        }
+                    }
+                }
+            });
+            
+            // Process Unlock fields - all unlock-related fields grouped together
+            const unlockFields = ['Needs to be unlocked', 'Unlocked by', 'Rank requirement', 
+                                 'Found in region', 'Found on map', 'Contract or task name for unlock'];
+            unlockFields.forEach(field => {
+                const columnIndex = columnMapping[field];
+                if (columnIndex !== undefined && !isEmpty(row[columnIndex])) {
+                    const value = cleanCellValue(row[columnIndex]);
+                    if (value) {
+                        const key = fieldToKey(field);
+                        
+                        // Special handling for boolean field
+                        if (field === 'Needs to be unlocked') {
+                            vehicle.unlock[key] = value.toLowerCase() === 'true' || value.toLowerCase() === 'yes';
+                        } else {
+                            vehicle.unlock[key] = value;
+                        }
+                    }
+                }
+            });
+            
+            // Process Specs fields
+            APPROVED_FIELDS.specs.forEach(field => {
+                const columnIndex = columnMapping[field];
+                if (columnIndex !== undefined && !isEmpty(row[columnIndex])) {
+                    const value = cleanCellValue(row[columnIndex]);
+                    if (value) {
+                        const key = fieldToKey(field);
+                        vehicle.specs[key] = value;
+                    }
+                }
+            });
+            
+            // Process Tires (grouped) - clean keys and handle multi-value
+            APPROVED_FIELDS.tires.forEach(field => {
+                const columnIndex = columnMapping[field];
+                if (columnIndex !== undefined && !isEmpty(row[columnIndex])) {
+                    const value = cleanCellValue(row[columnIndex]);
+                    if (value) {
+                        let key;
+                        if (field === 'Mass per tire') key = 'massPerTire';
+                        else if (field === 'Flotation tires') key = 'flotation'; 
+                        else if (field === 'Recommended by VladVulcan') key = 'recommended';
+                        else key = fieldToKey(field);
+                        
+                        // Special handling for tire recommendations - detect multiple tire entries
+                        if (field === 'Recommended by VladVulcan') {
+                            // Split on semicolons first
+                            if (value.includes(';')) {
+                                const items = value
+                                    .split(';')
+                                    .map(item => item.trim())
+                                    .filter(item => item && !isEmpty(item));
+                                vehicle.tires[key] = items.length > 1 ? items : items[0] || value;
+                            } else {
+                                // Try to detect multiple tire names separated by spaces
+                                // Common patterns: "MB Actros tires OHD I" or "Atom tires JAT MHS IV"
+                                const tirePatterns = /\\b(tires|OHD|JAT|MHS|MS|MMD|ATHD|ATMD|chains|Atom|MB|Actros)\\b/gi;
+                                const words = value.split(/\\s+/);
+                                const tireItems = [];
+                                let currentItem = [];
+                                
+                                for (let i = 0; i < words.length; i++) {
+                                    const word = words[i];
+                                    currentItem.push(word);
+                                    
+                                    // If this word completes a tire name (ends with "tires" or known codes)
+                                    if (word.match(/^(tires|I|II|III|IV|V|chains)$/i) || 
+                                        (i === words.length - 1)) {
+                                        
+                                        const item = currentItem.join(' ').trim();
+                                        if (item) tireItems.push(item);
+                                        currentItem = [];
+                                    }
+                                }
+                                
+                                vehicle.tires[key] = tireItems.length > 1 ? tireItems : value;
+                            }
+                        } else {
+                            // Regular handling for other tire fields
+                            if (value.includes(';')) {
+                                const items = value
+                                    .split(';')
+                                    .map(item => item.trim())
+                                    .filter(item => item && !isEmpty(item));
+                                vehicle.tires[key] = items.length > 1 ? items : items[0] || value;
+                            } else {
+                                vehicle.tires[key] = value;
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Process Equipment sections - fix string splitting and handle multi-item fields
+            ['trailers', 'cargoLogging', 'support', 'special'].forEach(section => {
+                APPROVED_FIELDS[section].forEach(field => {
+                    const columnIndex = columnMapping[field];
+                    if (columnIndex !== undefined && !isEmpty(row[columnIndex])) {
+                        const value = cleanCellValue(row[columnIndex]);
+                        if (value) {
+                            let items = [];
+                            
+                            // Split on semicolons first
+                            if (value.includes(';')) {
+                                items = value
+                                    .split(';')
+                                    .map(item => item.trim())
+                                    .filter(item => item && !isEmpty(item));
+                            } else {
+                                // Special handling for known multi-item fields that were newline-separated
+                                if (field === 'Futom Logging Trailers' && 
+                                    value.includes('Futom-S') && value.includes('Futom-M')) {
+                                    
+                                    // Split "Futom-S logging trailer Futom-M logging trailer" 
+                                    const futomPattern = /(Futom-[SM]\s+logging\s+trailer)/gi;
+                                    const matches = value.match(futomPattern);
+                                    if (matches && matches.length > 1) {
+                                        items = matches.map(m => m.trim());
+                                    } else {
+                                        items = [value];
+                                    }
+                                } else if (value.includes(' + ') || value.includes(' +Crane') || 
+                                         value.includes('+Trailer') || value.includes('+LogCrane')) {
+                                    // Keep addon combinations as single items (don't split these)
+                                    items = [value];
+                                } else {
+                                    // Default: single item
+                                    items = [value];
+                                }
+                            }
+                            
+                            if (items.length > 0) {
+                                vehicle[section].push({
+                                    type: field,
+                                    values: items
+                                });
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Return null if no name (primary identifier missing)
+            if (!vehicle.identity.name) {
+                return null;
+            }
+            
+            return vehicle;
+        }
+        
+        function fieldToKey(fieldName) {
+            return fieldName
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, '_')
+                .replace(/_+/g, '_')
+                .replace(/^_|_$/g, '');
+        }
+        
+        function cleanText(text) {
+            if (!text) return '';
+            
+            let cleaned = text.trim();
+            
+            // Apply text replacements
+            Object.keys(TEXT_REPLACEMENTS).forEach(original => {
+                const replacement = TEXT_REPLACEMENTS[original];
+                cleaned = cleaned.replace(new RegExp(original, 'gi'), replacement);
+            });
+            
+            return cleaned;
+        }
+        
+        function createDebugSection(title, content) {
+            return `
+                <div class="debug-section">
+                    <div class="debug-title">${title}</div>
+                    ${content}
+                </div>
+            `;
+        }
+        
+        function showError(message) {
+            debugOutput.innerHTML = createDebugSection('❌ Error', `<div class="error">${message}</div>`);
+        }
+        
+        // STEP 3: UI FUNCTIONS - Enhanced Combobox Behavior
+        let currentSelectedVehicle = null;
+        let isDropdownOpen = false;
+        let activeClassFilters = new Set();
+        
+        // Global upgrades data storage
+        window.upgradesData = null;
+        
+        // Vehicle name matching helpers
+        function normalizeVehicleLookupName(name) {
+            return String(name || '')
+                .normalize('NFKC')
+                .replace(/[\u201C\u201D]/g, '"')
+                .replace(/[\u2018\u2019]/g, "'")
+                .replace(/\./g, '')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .toLowerCase();
+        }
+
+        function canonicalVehicleLookupName(name) {
+            return normalizeVehicleLookupName(name)
+                // remove quotes entirely
+                .replace(/["']/g, '')
+                // collapse everything to alphanumeric
+                .replace(/[^a-z0-9]/g, '');
+        }
+
+        function looseVehicleLookupTokens(name) {
+            return normalizeVehicleLookupName(name)
+                // remove punctuation
+                .replace(/[^a-z0-9\s]/g, ' ')
+                .split(/\s+/)
+                .filter(Boolean);
+        }
+
+        function getUpgradesForVehicle(vehicleName) {
+            const canonicalTarget = canonicalVehicleLookupName(vehicleName);
+            const targetTokens = looseVehicleLookupTokens(vehicleName);
+
+            for (const [jsonName, upgrades] of Object.entries(window.upgradesData || {})) {
+                const canonicalJson = canonicalVehicleLookupName(jsonName);
+                const jsonTokens = looseVehicleLookupTokens(jsonName);
+
+                // exact canonical match
+                if (canonicalJson === canonicalTarget) {
+                    return upgrades;
+                }
+
+                // token overlap match (handles missing -3N, spacing issues, etc.)
+                const overlap = targetTokens.filter(t => jsonTokens.includes(t));
+                if (overlap.length >= Math.min(targetTokens.length, jsonTokens.length) - 1) {
+                    return upgrades;
+                }
+            }
+
+            console.log('❌ No upgrade match found for:', vehicleName);
+            console.log('   canonical:', canonicalTarget);
+            console.log('   tokens:', targetTokens);
+            console.log('   sample JSON keys:', Object.keys(window.upgradesData || {}).slice(0, 30));
+
+            return [];
+        }
+        
+        // Upgrade name normalization and categorization
+        const UPGRADE_NAME_MAP = {
+            "Raised": "Raised Suspension",
+            "Active": "Active Suspension",
+            "Crawler": "Crawler Suspension",
+
+            "Fine-tune": "Fine-Tune Gearbox",
+            "Freeway": "Freeway Gearbox",
+            "Highrange": "High Range Gearbox",
+            "Offroad": "Offroad Gearbox",
+            "SnowRunner": "SnowRunner Gearbox",
+            "Special": "Special Gearbox",
+            "Advanced Special": "Advanced Special Gearbox",
+
+            "Engageable": "Locking Differential",
+            "Engageable AWD": "AWD",
+
+            "Metal Detector Module": "Metal Detector Module",
+            "Multipurpose": "Multipurpose Module",
+            "Tuned Custom": "Tuned Custom Suspension",
+            "Sport": "Sport Gearbox"
+        };
+
+        function normalizeUpgradeName(name) {
+            const cleaned = String(name || '').trim();
+            const mapped = UPGRADE_NAME_MAP[cleaned] || cleaned;
+
+            // Fix decimal commas inside engine-style names only in display
+            return mapped.replace(/(\d),(\d)/g, '$1.$2');
+        }
+        
+        function getUpgradeCategory(normalizedName) {
+            if (normalizedName.includes('Suspension')) return 'Suspension Upgrade';
+            if (normalizedName.includes('Gearbox')) return 'Gearbox Upgrade';
+            if (normalizedName === 'AWD') return 'AWD Upgrade';
+            if (normalizedName === 'Locking Differential') return 'Differential Upgrade';
+            if (normalizedName === 'Metal Detector Module') return 'Special Module';
+            if (normalizedName === 'Multipurpose Module') return 'Special Module';
+
+            // Engine/model names should default to engine
+            return 'Engine Upgrade';
+        }
+        
+        function renderTwoColumnBulletList(items) {
+            if (!items || !Array.isArray(items) || items.length === 0) {
+                return '';
+            }
+            
+            const cleanItems = items
+                .map(item => String(item).trim())
+                .filter(Boolean);
+            
+            if (cleanItems.length === 0) {
+                return '';
+            }
+            
+            const bulletItems = cleanItems.map(item => 
+                `<div class="bullet-item">${escapeHtml(item)}</div>`
+            ).join('');
+            
+            return `<div class="two-column-bullet-grid">${bulletItems}</div>`;
+        }
+        
+        function renderUpgradesSection(vehicle) {
+            // Get upgrades for this vehicle
+            const upgrades = getUpgradesForVehicle(vehicle.identity?.name || '');
+            
+            if (!window.upgradesData) {
+                return `
+                    <div class="detail-section">
+                        <h3>Upgrades</h3>
+                        <div class="detail-text">No upgrade data loaded</div>
+                    </div>
+                `;
+            }
+            
+            if (!upgrades || upgrades.length === 0) {
+                // Optional debug logging for unmatched vehicles
+                if (vehicle.identity?.name) {
+                    console.log('🔍 No upgrades found for CSV vehicle:', vehicle.identity.name);
+                }
+                
+                return `
+                    <div class="detail-section">
+                        <h3>Upgrades</h3>
+                        <div class="detail-text">No upgrade data available</div>
+                    </div>
+                `;
+            }
+            
+            // Render upgrade rows
+            const upgradeRows = upgrades.map(upgrade => {
+                const normalizedName = normalizeUpgradeName(upgrade.upgrade);
+                const category = getUpgradeCategory(normalizedName);
+                const location = upgrade.location || 'Location unknown';
+                const notes = upgrade.notes || '';
+                
+                let upgradeHTML = `
+                    <div class="stat-row">
+                        <span class="stat-label">${escapeHtml(normalizedName)}</span>
+                        <span class="stat-value">${escapeHtml(category)} — ${escapeHtml(location)}`;
+                
+                // Add notes if present
+                if (notes.trim()) {
+                    upgradeHTML += `<br><span style="color: #aaa; font-size: 0.9em;">${escapeHtml(notes)}</span>`;
+                }
+                
+                upgradeHTML += `</span>
+                    </div>
+                `;
+                
+                return upgradeHTML;
+            }).join('');
+            
+            return `
+                <div class="detail-section">
+                    <h3>Upgrades</h3>
+                    <div class="main-stat-grid">
+                        ${upgradeRows}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function initializeStep3UI() {
+            const step3UI = document.getElementById('step3UI');
+            const vehicleSearch = document.getElementById('vehicleSearch');
+            const searchResults = document.getElementById('searchResults');
+            const vehicleDisplay = document.getElementById('vehicleDisplay');
+            
+            // Show the UI
+            step3UI.style.display = 'block';
+            
+            // Initialize combobox functionality
+            let searchTimeout;
+
+            // Class filter pill handlers
+            const filterPills = document.querySelectorAll('.filter-pill');
+            filterPills.forEach(pill => {
+                pill.addEventListener('click', () => {
+                    const className = pill.getAttribute('data-class');
+                    
+                    if (activeClassFilters.has(className)) {
+                        activeClassFilters.delete(className);
+                        pill.classList.remove('active');
+                    } else {
+                        activeClassFilters.add(className);
+                        pill.classList.add('active');
+                    }
+                    
+                    // Clear search input
+                    vehicleSearch.value = '';
+                    
+                    // Reset selected vehicle
+                    currentSelectedVehicle = null;
+                    
+                    // Show filtered vehicles immediately
+                    showAllVehicles();
+                });
+            });
+            
+            // Handle input (typing) - filter the list
+            vehicleSearch.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    handleSearch(e.target.value);
+                }, 150);
+            });
+
+            // Open dropdown on first focus
+            vehicleSearch.addEventListener('focus', () => {
+                vehicleSearch.select(); // 👈 THIS is the fix
+                showAllVehicles();
+            });
+
+            // Open dropdown on click every time
+            vehicleSearch.addEventListener('click', (e) => {
+                e.stopPropagation();
+                vehicleSearch.select(); // 👈 same behavior on click
+                showAllVehicles();
+            });
+
+            // Close only when clicking completely outside
+            document.addEventListener('mousedown', (e) => {
+                if (!e.target.closest('.vehicle-search-container')) {
+                    closeDropdown();
+                }
+            });
+
+            // Handle keyboard navigation
+            vehicleSearch.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeDropdown();
+                } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (!isDropdownOpen) {
+                        showAllVehicles();
+                    } else {
+                        navigateDropdown(e.key === 'ArrowDown' ? 1 : -1);
+                    }
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    selectHighlightedVehicle();
+                }
+            });
+            
+            console.log(`🔍 STEP 3 UI Ready - ${window.step2Data.normalizedVehicles.length} vehicles available`);
+            
+            // Add final STEP 3 completion section to debug output
+            const step3HTML = createDebugSection('🎯 STEP 3: UI Complete', `
+                <div class="success">✅ Vehicle reference UI initialized</div>
+                <div><strong>Total vehicles available in dropdown:</strong> ${window.step2Data.normalizedVehicles.length}</div>
+                <div><strong>Features available:</strong></div>
+                <ul style="color: #aaa; margin: 10px 0; padding-left: 20px;">
+                    <li>Click to browse all vehicles</li>
+                    <li>Type to search and filter</li>
+                    <li>Keyboard navigation (arrows, Enter, Escape)</li>
+                    <li>Persistent selection behavior</li>
+                    <li>Auto-hide empty sections</li>
+                    <li>Mobile-friendly responsive layout</li>
+                </ul>
+            `);
+            debugOutput.innerHTML += step3HTML;
+        }
+        
+        function showAllVehicles() {
+            const searchResults = document.getElementById('searchResults');
+            let vehicles = window.step2Data.normalizedVehicles;
+
+            // Apply class filter - if no chips active, show all
+            if (activeClassFilters.size > 0) {
+                vehicles = vehicles.filter(vehicle => {
+                    return activeClassFilters.has(vehicle.identity.vehicle_class);
+                });
+            }
+            
+            // Sort vehicles alphabetically for better browsing
+            const sortedVehicles = [...vehicles].sort((a, b) => 
+                a.identity.name.localeCompare(b.identity.name)
+            );
+            
+            // BUG 2 FIX: Use data attributes instead of unsafe onclick handlers
+            const resultsHTML = sortedVehicles.map((vehicle, index) => 
+                `<div class="search-result-item" data-index="${index}">
+                    ${escapeHtml(vehicle.identity.name)}
+                    ${vehicle.identity.dlc_required ? `<span style="color: #ff9d00; font-size: 12px;"> (${escapeHtml(vehicle.identity.dlc_required)})</span>` : ''}
+                </div>`
+            ).join('');
+			
+			searchResults.innerHTML = resultsHTML;
+            
+            searchResults.querySelectorAll('.search-result-item').forEach(item => {
+    item.addEventListener('click', () => {
+        const index = parseInt(item.getAttribute('data-index'), 10);
+        const vehicle = sortedVehicles[index];
+        if (vehicle) {
+            selectVehicle(vehicle);
+        }
+    });
+});
+            
+            searchResults.style.display = 'block';
+            isDropdownOpen = true;
+            
+            // Highlight current selection if any
+            if (currentSelectedVehicle) {
+                highlightVehicleInList(currentSelectedVehicle);
+            }
+        }
+        
+        function handleSearch(query) {
+            const searchResults = document.getElementById('searchResults');
+            
+            if (!query.trim()) {
+                showAllVehicles();
+                return;
+            }
+            
+            let vehicles = window.step2Data.normalizedVehicles;
+
+            // Apply class filter - if no chips active, show all
+            if (activeClassFilters.size > 0) {
+                vehicles = vehicles.filter(vehicle => {
+                    return activeClassFilters.has(vehicle.identity.vehicle_class);
+                });
+            }
+            const filteredVehicles = vehicles.filter(vehicle => 
+                vehicle.identity.name && 
+                vehicle.identity.name.toLowerCase().includes(query.toLowerCase())
+            );
+            
+            if (filteredVehicles.length === 0) {
+                searchResults.innerHTML = '<div class="search-result-item" style="color: #666;">No vehicles found</div>';
+                searchResults.style.display = 'block';
+                isDropdownOpen = true;
+                return;
+            }
+            
+            // Sort filtered results
+            const sortedResults = filteredVehicles.sort((a, b) => 
+                a.identity.name.localeCompare(b.identity.name)
+            );
+            
+            // BUG 2 FIX: Use data attributes instead of unsafe onclick handlers
+            const resultsHTML = sortedResults.slice(0, 20).map((vehicle, index) => 
+                `<div class="search-result-item" data-index="${index}">
+                    ${escapeHtml(vehicle.identity.name)}
+                    ${vehicle.identity.dlc_required ? `<span style="color: #ff9d00; font-size: 12px;"> (${escapeHtml(vehicle.identity.dlc_required)})</span>` : ''}
+                </div>`
+            ).join('');
+            
+            searchResults.innerHTML = resultsHTML;
+            
+            // BUG 2 FIX: Add safe event listeners to each item
+            searchResults.querySelectorAll('.search-result-item').forEach(item => {
+    item.addEventListener('click', () => {
+        const index = parseInt(item.getAttribute('data-index'), 10);
+        const vehicle = sortedResults[index];
+        if (vehicle) {
+            selectVehicle(vehicle);
+        }
+    });
+});
+            
+            searchResults.style.display = 'block';
+            isDropdownOpen = true;
+        }
+        
+        function selectVehicle(vehicle) {
+            const vehicleSearch = document.getElementById('vehicleSearch');
+
+            currentSelectedVehicle = vehicle;
+            vehicleSearch.value = vehicle.identity.name;
+
+            closeDropdown();
+            displayVehicle(vehicle);
+        }
+        
+        function closeDropdown() {
+            const searchResults = document.getElementById('searchResults');
+            searchResults.style.display = 'none';
+            isDropdownOpen = false;
+        }
+        
+        function highlightVehicleInList(vehicleName) {
+            const items = document.querySelectorAll('.search-result-item');
+            items.forEach(item => {
+                if (item.textContent.includes(vehicleName)) {
+                    item.style.background = '#444';
+                } else {
+                    item.style.background = '';
+                }
+            });
+        }
+        
+        let highlightedIndex = -1;
+        
+        function navigateDropdown(direction) {
+            if (!isDropdownOpen) return;
+            
+            const items = document.querySelectorAll('.search-result-item');
+            if (items.length === 0) return;
+            
+            // Clear previous highlight
+            if (highlightedIndex >= 0 && highlightedIndex < items.length) {
+                items[highlightedIndex].style.background = '';
+            }
+            
+            // Update index
+            highlightedIndex += direction;
+            if (highlightedIndex < 0) highlightedIndex = items.length - 1;
+            if (highlightedIndex >= items.length) highlightedIndex = 0;
+            
+            // Highlight new item
+            items[highlightedIndex].style.background = '#555';
+            items[highlightedIndex].scrollIntoView({ block: 'nearest' });
+        }
+        
+        function selectHighlightedVehicle() {
+            if (!isDropdownOpen || highlightedIndex < 0) return;
+            
+            const items = document.querySelectorAll('.search-result-item');
+            if (highlightedIndex < items.length) {
+                items[highlightedIndex].click();
+            }
+        }
+        
+        function displayVehicle(vehicle) {
+            if (!vehicle) return;
+
+            const suspensionList = getSuspensionList(vehicle);
+
+            const classValue = vehicle.identity?.vehicle_class || '';
+            
+            const rawPrice = String(vehicle.identity?.truck_store_price || '')
+                .replace(/\$/g, '')
+                .replace(/\s+/g, '')
+                .trim();
+
+            const priceValue = formatDisplayValue(rawPrice, { type: 'number' });
+
+            const drivetrain = vehicle.specs?.drivetrain || '';
+            const awd = vehicle.specs?.all_wheel_drive || '';
+            const diffLock = vehicle.specs?.differential_locking || '';
+            const fuelCapacity = formatDisplayValue(vehicle.specs?.fuel_capacity_l, { type: 'number', suffix: ' L' });
+            const tireStock = vehicle.specs?.tire_diameter_stock_in ? `${normalizeDecimal(vehicle.specs.tire_diameter_stock_in)}"` : '';
+            const tireMax = vehicle.specs?.tire_diameter_max_in ? `${normalizeDecimal(vehicle.specs.tire_diameter_max_in)}"` : '';
+            const topTorque = formatDisplayValue(vehicle.specs?.top_engine_torque, { type: 'number' });
+            const totalMass = formatDisplayValue(vehicle.specs?.total_mass_with_wheels, { type: 'number' });
+            const torqueToMass = formatDisplayValue(vehicle.specs?.torque_to_mass_ratio, { type: 'decimal' });
+
+            const massPerTire = formatDisplayValue(vehicle.tires?.massPerTire, { type: 'number', suffix: ' kg' });
+            const flotation = vehicle.tires?.flotation || '';
+            const recommendedTires = formatDisplayValue(vehicle.tires?.recommended, { type: 'list' });
+
+            // Create unlock info rows
+            const unlockRows = [
+                createStatRow('DLC Required', vehicle.identity?.dlc_required),
+                createStatRow('Unlock Required', vehicle.unlock?.needs_to_be_unlocked ? 'Yes' : ''),
+                createStatRow('Region', vehicle.unlock?.found_in_region),
+                createStatRow('Map', vehicle.unlock?.found_on_map),
+                createStatRow('Contract / Task', vehicle.unlock?.contract_or_task_name_for_unlock),
+                createStatRow('Rank', vehicle.unlock?.rank_requirement)
+            ].join('');
+
+            // Helper to extract equipment values
+            function getEquipmentValues(equipmentArray) {
+                if (!Array.isArray(equipmentArray) || equipmentArray.length === 0) return '';
+                
+                const output = [];
+                
+                equipmentArray.forEach(item => {
+                    if (!item || !item.values) return;
+                    
+                    const values = Array.isArray(item.values) ? item.values : [item.values];
+                    
+                    values.forEach(value => {
+                        const cleanValue = String(value).trim();
+                        const lowerValue = cleanValue.toLowerCase();
+                        
+                        // Special rule for Foldable Logging Semitrailer
+                        if (item.type === 'Foldable Logging Semitrailer (Long Logs)' &&
+                            (lowerValue === 'yes' || lowerValue === 'true')) {
+                            output.push('Folding Long Log Trailer');
+                            return;
+                        }
+                        
+                        if (cleanValue && lowerValue !== 'no' && lowerValue !== 'false' && lowerValue !== 'n/a') {
+                            output.push(cleanValue);
+                        }
+                    });
+                });
+                
+                return output.join(', ');
+            }
+
+            const moreDetailsHTML = `
+                <details class="more-details">
+                    <summary>More Details</summary>
+
+                    ${unlockRows ? `
+                        <div class="detail-section">
+                            <h3>Unlock / How to Obtain</h3>
+                            ${unlockRows}
+                        </div>
+                    ` : ''}
+
+                    ${isMeaningfulValue(vehicle.specs?.gearboxes) ? `
+                        <div class="detail-section">
+                            <h3>Gearboxes</h3>
+                            <div class="detail-text">${formatDisplayValue(vehicle.specs.gearboxes, { type: 'list' })}</div>
+                        </div>
+                    ` : ''}
+
+                    ${isMeaningfulValue(vehicle.specs?.winches) ? `
+                        <div class="detail-section">
+                            <h3>Winches</h3>
+                            <div class="detail-text">${formatDisplayValue(vehicle.specs.winches, { type: 'list' })}</div>
+                        </div>
+                    ` : ''}
+
+                    ${vehicle.trailers && vehicle.trailers.length > 0 ? `
+                        <div class="detail-section">
+                            <h3>Trailers</h3>
+                            ${renderTwoColumnBulletList(getEquipmentValues(vehicle.trailers).split(', '))}
+                        </div>
+                    ` : ''}
+
+                    ${vehicle.cargoLogging && vehicle.cargoLogging.length > 0 ? `
+                        <div class="detail-section">
+                            <h3>Cargo & Logging</h3>
+                            ${renderTwoColumnBulletList(formatDisplayValue(getEquipmentValues(vehicle.cargoLogging), { type: 'hyphen-groups' }).split(', '))}
+                        </div>
+                    ` : ''}
+
+                    ${vehicle.support && vehicle.support.length > 0 ? renderSupportDetails(vehicle.support) : ''}
+
+                    ${vehicle.special && vehicle.special.length > 0 ? `
+                        <div class="detail-section">
+                            <h3>Special Equipment</h3>
+                            ${renderTwoColumnBulletList(formatDisplayValue(getEquipmentValues(vehicle.special), { type: 'list' }).split(', '))}
+                        </div>
+                    ` : ''}
+
+                    ${renderUpgradesSection(vehicle)}
+                </details>
+            `;
+
+            const html = `
+                <div class="vehicle-summary-card">
+                    <div class="vehicle-header">
+                        <h2>${escapeHtml(vehicle.identity?.name || 'Unknown Vehicle')}</h2>
+                        <div class="vehicle-subheader">
+                            <span><strong>Class:</strong> ${escapeHtml(classValue)}</span>
+                            <span class="vehicle-price"><strong>Price:</strong> $${escapeHtml(priceValue)}</span>
+                        </div>
+                    </div>
+
+                    <div class="main-stat-grid">
+                        ${createStatRow('Drivetrain', drivetrain)}
+                        ${createStatRow('AWD', awd)}
+                        ${createStatRow('Diff Lock', diffLock)}
+                        ${createStatRow('Fuel Capacity', fuelCapacity)}
+                        ${createStatRow('Tire Diameter Stock', tireStock)}
+                        ${createStatRow('Tire Diameter Max', tireMax)}
+                        ${createStatRow('Top Engine Torque', topTorque)}
+                        ${createStatRow('Total Mass With Wheels', totalMass)}
+                        ${createStatRow('Torque To Mass Ratio', torqueToMass)}
+                    </div>
+
+                    ${isMeaningfulValue(suspensionList) ? `
+                        <div class="compact-block">
+                            <div class="block-title">Suspensions</div>
+                            <div class="block-value">${escapeHtml(suspensionList)}</div>
+                        </div>
+                    ` : ''}
+
+                    ${(massPerTire || flotation || recommendedTires) ? `
+                        <div class="compact-block tire-block">
+                            <div class="block-title">Tires</div>
+                            ${createStatRow('Mass Per Tire', massPerTire)}
+                            ${createStatRow('Flotation', flotation)}
+                            ${createStatRow('Recommended', recommendedTires)}
+                        </div>
+                    ` : ''}
+
+                    ${moreDetailsHTML}
+                </div>
+            `;
+
+            document.getElementById('vehicleDisplay').innerHTML = html;
+        }
+        
+        function renderVehicleSection(title, data, sectionType) {
+            let html = `
+                <div class="vehicle-section">
+                    <div class="vehicle-section-title">${escapeHtml(title)}</div>
+            `;
+            
+            Object.keys(data).forEach(key => {
+                if (key === 'name') return; // Skip name, already shown as title
+                
+                const value = data[key];
+                if (value === null || value === undefined || value === '') return;
+                
+                const label = formatFieldLabel(key);
+                const displayValue = Array.isArray(value) ? value.join(', ') : value.toString();
+                
+                html += `
+                    <div class="vehicle-field">
+                        <div class="vehicle-field-label">${escapeHtml(label)}:</div>
+                        <div class="vehicle-field-value">${escapeHtml(displayValue)}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            return html;
+        }
+        
+        function renderEquipmentSection(title, equipment) {
+            let html = `
+                <div class="vehicle-section">
+                    <div class="vehicle-section-title">${escapeHtml(title)}</div>
+                    <div class="equipment-list">
+            `;
+            
+            equipment.forEach(item => {
+                html += `
+                    <div class="equipment-item">
+                        <div class="equipment-type">${escapeHtml(item.type)}</div>
+                        <div class="equipment-values">${escapeHtml(item.values.join(', '))}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div></div>';
+            return html;
+        }
+        
+        function formatFieldLabel(key) {
+            return key
+                .replace(/_/g, ' ')
+                .replace(/\b\w/g, l => l.toUpperCase());
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Display helper functions
+        function isMeaningfulValue(value) {
+            if (value === null || value === undefined) return false;
+
+            const str = String(value).trim().toLowerCase();
+
+            return !(
+                str === '' ||
+                str === 'no' ||
+                str === 'n/a' ||
+                str === 'na' ||
+                str === 'none' ||
+                str === '-'
+            );
+        }
+
+        function normalizeDecimal(value) {
+            if (!isMeaningfulValue(value)) return '';
+            return String(value).trim().replace(/(\d),(\d)/g, '$1.$2');
+        }
+
+        function formatNumber(value) {
+            if (!isMeaningfulValue(value)) return '';
+
+            let str = normalizeDecimal(value);
+
+            // If it's a plain integer, add thousands separators
+            if (/^-?\d+$/.test(str)) {
+                return Number(str).toLocaleString('en-US');
+            }
+
+            // If it's a decimal number, preserve decimals but add commas
+            if (/^-?\d+\.\d+$/.test(str)) {
+                const [whole, decimal] = str.split('.');
+                return `${Number(whole).toLocaleString('en-US')}.${decimal}`;
+            }
+
+            return str;
+        }
+
+        function formatHyphenGroups(value) {
+            if (!isMeaningfulValue(value)) return '';
+
+            const str = String(value).trim();
+
+            // turns: "1100-8-180 750-5-430 600-2-1980"
+            // into:  "1100-8-180, 750-5-430, 600-2-1980"
+            if (/^\S+-\S+-\S+(?:\s+\S+-\S+-\S+)+$/.test(str)) {
+                return str.split(/\s+/).join(', ');
+            }
+
+            return str;
+        }
+
+        function formatList(value) {
+            if (!isMeaningfulValue(value)) return '';
+
+            let str = String(value).trim();
+
+            // First fix hyphen-group blocks
+            str = formatHyphenGroups(str);
+
+            // If commas already exist, normalize spacing only
+            if (str.includes(',')) {
+                return str
+                    .split(',')
+                    .map(item => item.trim())
+                    .filter(Boolean)
+                    .join(', ');
+            }
+
+            // Tire-style cleanup example:
+            // "OHD I JAT MHS IV" -> "OHD I, JAT MHS IV"
+            // This is intentionally conservative.
+            const knownTireFamilies = [
+                'OHD', 'MSH', 'JAT', 'TM', 'DMHS', 'UOD', 'MHS', 'MUD', 'CHAIN'
+            ];
+
+            const parts = str.split(/\s+/);
+            const grouped = [];
+            let current = [];
+
+            for (let i = 0; i < parts.length; i++) {
+                const word = parts[i];
+
+                if (knownTireFamilies.includes(word.toUpperCase()) && current.length) {
+                    grouped.push(current.join(' '));
+                    current = [word];
+                } else {
+                    current.push(word);
+                }
+            }
+
+            if (current.length) grouped.push(current.join(' '));
+
+            if (grouped.length > 1) {
+                return grouped.join(', ');
+            }
+
+            return str;
+        }
+
+        function formatDisplayValue(value, options = {}) {
+            if (!isMeaningfulValue(value)) return '';
+
+            const {
+                type = 'text',
+                suffix = ''
+            } = options;
+
+            let result = String(value).trim();
+
+            if (type === 'number') {
+                result = formatNumber(result);
+            } else if (type === 'decimal') {
+                result = formatNumber(normalizeDecimal(result));
+            } else if (type === 'list') {
+                result = formatList(result);
+            } else if (type === 'hyphen-groups') {
+                result = formatHyphenGroups(result);
+            }
+
+            return suffix ? `${result}${suffix}` : result;
+        }
+
+        function createStatRow(label, value) {
+            if (!isMeaningfulValue(value)) return '';
+            return `
+                <div class="stat-row">
+                    <span class="stat-label">${label}</span>
+                    <span class="stat-value">${value}</span>
+                </div>
+            `;
+        }
+
+        function getSuspensionList(vehicle) {
+            const possibleSuspensions = [
+                vehicle?.specs?.raised_suspension,
+                vehicle?.specs?.custom_suspension,
+                vehicle?.specs?.active_suspension,
+                vehicle?.specs?.crawler_suspension
+            ];
+
+            const cleaned = possibleSuspensions
+                .filter(isMeaningfulValue)
+                .map(v => String(v).trim());
+
+            return cleaned.length ? cleaned.join(', ') : '';
+        }
+
+        function renderSupportDetails(supportArray) {
+            if (!Array.isArray(supportArray) || supportArray.length === 0) return '';
+
+            const rows = [];
+
+            supportArray.forEach(item => {
+                if (!item || !item.type || !item.values) return;
+
+                const values = Array.isArray(item.values) ? item.values : [item.values];
+
+                values.forEach(value => {
+                    const cleanValue = String(value).trim();
+                    const lowerValue = cleanValue.toLowerCase();
+
+                    if (
+                        lowerValue === '' ||
+                        lowerValue === 'no' ||
+                        lowerValue === 'false' ||
+                        lowerValue === 'n/a'
+                    ) {
+                        return;
+                    }
+
+                    // Keep raw dash format, just clean spacing
+                    const formattedValue = formatHyphenGroups(cleanValue);
+
+                    rows.push(`
+                        <div class="stat-row">
+                            <span class="stat-label">${escapeHtml(item.type)}</span>
+                            <span class="stat-value">${escapeHtml(formattedValue)}</span>
+                        </div>
+                    `);
+                });
+            });
+
+            if (rows.length === 0) return '';
+
+            return `
+                <div class="detail-section">
+                    <h3>Support</h3>
+                    <div class="main-stat-grid">
+                        ${rows.join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        console.log('🧱 STEP 2: Normalization Layer Ready');
+        console.log('🔍 STEP 3: UI Layer Ready');
+        
+        // Auto-load saved data on startup
+        autoLoadSavedData();
+    </script>
+</body>
+</html>
